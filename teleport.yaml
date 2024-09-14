@@ -1,0 +1,43 @@
+version: v3
+teleport:
+  data_dir: /.bottlerocket/host-containers/current/data_dir
+  join_params:
+    token_name: iam-node-join-token
+    method: iam
+  log:
+    format:
+      extra_fields:
+      - timestamp
+      - level
+      - component
+      - caller
+      output: text
+    output: stderr
+    severity: INFO
+  proxy_server: <add_teleport_endpoint_here>
+auth_service:
+  enabled: false
+proxy_service:
+  enabled: false
+ssh_service:
+  enabled: true
+  enhanced_recording:
+    # enhanced recording requires additional capabilities which
+    # can be granted by enabling "superpowered" mode for host container 
+    enabled: false
+  labels:
+    env: demo
+  commands:
+    # Run below commands and autoregister output as node labels
+    - name: version_id
+      command: ['/bin/sh', '-c', 'apiclient get /os | jq -r .version_id']
+      period: 1h0m0s
+    - name: variant_id
+      command: ['/bin/sh', '-c', 'apiclient get /os | jq -r .variant_id']
+      period: 1h0m0s
+    - name: arch
+      command: ['/bin/sh', '-c', 'apiclient get /os | jq -r .arch']
+      period: 1h0m0s
+    - name: cluster-name
+      command: ['/bin/sh', '-c', 'apiclient get /settings | jq -r ".kubernetes | .[\"cluster-name\"]"']
+      period: 1h0m0s

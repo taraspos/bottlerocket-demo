@@ -1,0 +1,36 @@
+---
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: bottlerocket-demo
+  region: eu-central-1
+  version: '1.30'
+  tags:
+    demo: bottlerocket
+
+vpc:
+  clusterEndpoints:
+    privateAccess: true
+    publicAccess: false
+
+managedNodeGroups:
+  - name: mng-bottlerocket
+    instanceType: t4g.micro
+    desiredCapacity: 2
+    amiFamily: Bottlerocket
+    disableIMDSv1: true
+    iam:
+       attachPolicyARNs:
+          - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+          - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+          - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+          - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+    bottlerocket:
+      settings:
+        host-containers:
+    #       teleport:
+    #         enabled: true
+    #         source: ghcr.io/taraspos/bottlerocket-demo:16.3.0-teleport-host-container
+    #         superpowered: false
+    #         user-data: "<addd_base64_encoded_userdata_here>"
