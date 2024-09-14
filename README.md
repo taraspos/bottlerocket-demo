@@ -27,7 +27,7 @@
 - Create new in-vpc Cloud Shell
     - Select VPC created by eksctl
     - Select Private subnet created by eksctl
-    - Select `ControlPlaneSecurityGroup` created by eksctl
+    - Select `ClusterSharedNodeSecurityGroup` created by eksctl
 
 - [Install eksctl](https://eksctl.io/installation/) again :D 
 - Clone this repo again
@@ -66,56 +66,19 @@
     eksctl create nodegroup -f eksctl.yaml 
     ```
 
+- Configure kubectl
+
+    ```shell
+    eksctl utils write-kubeconfig -f eksctl.yaml
+    ```
+
 ### (optional) Registering EKS cluster as teleport resource
 
 - [Install helm](https://helm.sh/docs/intro/install/)
-- Create RBAC resources ([doc](https://goteleport.com/docs/enroll-resources/kubernetes-access/getting-started/#step-13-create-rbac-resources))
 
-   - Kubernetes ClusterRoleBinding
+    - Go to teleport UI and select enroll EKS resource, follow the instructions
 
-        ```yaml
-        kubectl apply -f - <<EOF
-            apiVersion: rbac.authorization.k8s.io/v1
-            kind: ClusterRoleBinding
-            metadata:
-              name: admin-crb
-            subjects:
-            - kind: Group
-              # Bind the group "viewers" to the kubernetes_groups assigned in the "kube-access" role
-              name: admin
-              apiGroup: rbac.authorization.k8s.io
-            roleRef:
-              kind: ClusterRole
-              # "view" is a default ClusterRole that grants read-only access to resources
-              # See: https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles
-              name: admin
-              apiGroup: rbac.authorization.k8s.io
-            EOF
-        ```
-
-    - Go to teleport UI and Teleport role
-
-        ```yaml
-        kind: role
-        metadata:
-          name: kube-admin-access
-        version: v7
-        spec:
-          allow:
-            kubernetes_labels:
-              '*': '*'
-            kubernetes_resources:
-              - kind: '*'
-                namespace: '*'
-                name: '*'
-                verbs: ['*']
-            kubernetes_groups:
-            - admin
-          deny: {}
-
-        ```
-
-    - Go to teleport UI and select enroll Kubernetes resource, follow the instructions
+    - TODO, get proper role configs
 
     - Done, you should be able to access private kubernetes cluster with Teleport now
 

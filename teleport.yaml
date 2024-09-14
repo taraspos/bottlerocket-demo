@@ -14,7 +14,7 @@ teleport:
       output: text
     output: stderr
     severity: INFO
-  proxy_server: <add_teleport_endpoint_here>
+  proxy_server: <add_teleport_endpoint_here>:443
 auth_service:
   enabled: false
 proxy_service:
