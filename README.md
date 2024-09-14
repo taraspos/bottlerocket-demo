@@ -54,6 +54,11 @@
         version: v2
         ```
 
+>[!NOTE]
+> Due to limited configuration options available for [bottlerocket host containers](https://bottlerocket.dev/en/os/1.20.x/api/settings/host-containers),
+> we need to build custom image, based of [bottlerocket-os/bottlerocket-control-container](https://github.com/bottlerocket-os/bottlerocket-control-container)
+>
+> Image available in this repo intended for demo purposes only.
 
 - Run eksctl to create managed node groups
 
