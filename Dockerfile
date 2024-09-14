@@ -6,4 +6,6 @@ FROM public.ecr.aws/bottlerocket/bottlerocket-control:v${CONTROL_CONTAINER_VERSI
 
 COPY --from=teleport /usr/local/bin/teleport /usr/local/bin/teleport
 
-ENTRYPOINT ["/usr/bin/dumb-init", "/usr/local/bin/teleport", "start", "-c", "/.bottlerocket/host-containers/current/user-data"]
+ENTRYPOINT ["/usr/local/bin/teleport"]
+CMD [ "start", "--config", "/.bottlerocket/host-containers/current/user-data" ]
+
