@@ -1,0 +1,58 @@
+name: cd
+on:
+  push:
+    tags:
+      - v*
+
+permissions:
+  contents: read
+
+jobs:
+  build_and_push_artifacts:
+    runs-on: ubuntu-latest
+    name: Build and push docker image
+    permissions:
+      packages: write
+      id-token: write
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup docker buildx
+        uses: docker/setup-buildx-action@v3
+        
+
+      - name: Login to GitHub Container Registry
+        id: login-ghcr
+        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Prepare docker labels and tags
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/${{ github.repository }}
+          flavor: |
+            latest=false
+          # Enable sha tag on branch push events and workflow dispatches.
+          # Enable semver tags on tag push events, but don't overwrite major/minor tags for prereleases.
+          tags: |
+            type=semver,pattern={{version}},event=tag
+  
+      - name: Build the Docker image and push
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: |
+            linux/amd64
+            linux/arm64
