@@ -1,5 +1,7 @@
 # Bottlerocket EKS demo
 
+In this demo we will create private EKS cluster with the set of private bottlerocket nodes and configure access to Kubernetes and instances via Teleport Cloud.
+
 ## Prerequisites
 
 - AWS Account
@@ -76,9 +78,52 @@
 
 - [Install helm](https://helm.sh/docs/intro/install/)
 
-    - Go to teleport UI and select enroll EKS resource, follow the instructions
+- Create RBAC resources ([doc](https://goteleport.com/docs/enroll-resources/kubernetes-access/getting-started/#step-13-create-rbac-resources))
 
-    - TODO, get proper role configs
+   - Kubernetes ClusterRoleBinding
+
+        ```yaml
+        kubectl apply -f - <<EOF
+          apiVersion: rbac.authorization.k8s.io/v1
+          kind: ClusterRoleBinding
+          metadata:
+            name: cluster-admin-crb
+          subjects:
+          - kind: Group
+            name: cluster-admins
+            apiGroup: rbac.authorization.k8s.io
+          roleRef:
+            kind: ClusterRole
+            # See: https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles
+            name: cluster-admin
+            apiGroup: rbac.authorization.k8s.io
+        EOF
+        ```
+
+    - Go to teleport UI and Teleport role
+
+        ```yaml
+        kind: role
+        metadata:
+          name: kube-admin-access
+        version: v7
+        spec:
+          allow:
+            kubernetes_labels:
+              '*': '*'
+            kubernetes_resources:
+              - kind: '*'
+                namespace: '*'
+                name: '*'
+                verbs: ['*']
+            kubernetes_groups:
+            - cluster-admins
+          deny: {}
+        ```
+
+    - Modify your user, to assign `kube-admin-access` role
+
+    - Go to teleport UI and select enroll Kubernetes resource, follow the instructions
 
     - Done, you should be able to access private kubernetes cluster with Teleport now
 
